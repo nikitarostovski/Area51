@@ -9,7 +9,6 @@
 #import "GameViewController.h"
 #import "GameScene.h"
 #import "MenuScene.h"
-#import <Chartboost/Chartboost.h>
 #import "GameCenterManager.h"
 #import "AppDelegate.h"
 
@@ -88,8 +87,7 @@ static const CGFloat kHeroMoveSpeed = 2.5f;
 - (void)showGame {
     SKView * skView = (SKView *)self.view;
     [skView presentScene:[self createGameScene]];
-    AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
-    delegate.scene = (GameScene *)skView.scene;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).scene = (GameScene *)skView.scene;
 }
 
 - (void)gameIsOverWithScore:(NSNumber *)score {
@@ -102,12 +100,8 @@ static const CGFloat kHeroMoveSpeed = 2.5f;
     }
     
     SKView * skView = (SKView *)self.view;
-    AppDelegate *delegate = [[UIApplication sharedApplication] delegate];
-    delegate.scene = nil;
+    ((AppDelegate *)[[UIApplication sharedApplication] delegate]).scene = nil;
     [skView presentScene:[self createMenuScene]];
-    if ([delegate canShowAds]) {
-        [Chartboost showInterstitial:CBLocationMainMenu];
-    }
 }
 
 @end

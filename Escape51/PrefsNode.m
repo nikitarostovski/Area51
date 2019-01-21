@@ -30,10 +30,9 @@ static const CGFloat kButtonSize = 0.15f;
         AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
         soundOn = appDelegate.soundOn;
         
-        
-        CGFloat buttonHeight = self.size.width * kButtonSize;
         CGFloat verticalOffset = self.size.height * 0.04f;
-        CGFloat totalButtonsHeight = 3 * buttonHeight + 2 * verticalOffset;
+        CGFloat buttonHeight = self.size.width * kButtonSize;
+        /*CGFloat totalButtonsHeight = 3 * buttonHeight + 2 * verticalOffset;
         CGFloat totalButtonsWidth = size.width * 0.6f;
         
         CGFloat startPosY = - totalButtonsHeight / 2;
@@ -47,7 +46,7 @@ static const CGFloat kButtonSize = 0.15f;
         adsBtn = [[SKPSettingsButton alloc] initWithImage:@"Btn_prefs_ads" Size:restoreBtn.size Text:@"Remove ADS" Text2:@""];
         [adsBtn setPosition:CGPointMake(0, restoreBtn.position.y + restoreBtn.size.height / 2 + verticalOffset + adsBtn.size.height / 2)];
         [adsBtn.button addTarget:self action:@selector(adsTap)];
-        [self addChild:adsBtn];
+        [self addChild:adsBtn];*/
         
         soundBtn = [[SKPSettingsButton alloc] initWithImage:@"Btn_prefs_sound_on" Size:restoreBtn.size Text:@"Sound On" Text2:@""];
         [soundBtn setPosition:CGPointMake(0, adsBtn.position.y + adsBtn.size.height / 2 + verticalOffset + soundBtn.size.height / 2)];
@@ -78,22 +77,9 @@ static const CGFloat kButtonSize = 0.15f;
     [self updateSoundButtonState];
 }
 
-- (void)adsTap {
-    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate removeAds];
-}
-
-- (void)restoreTap {
-    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    [appDelegate restorePurchases];
-}
-
-
 - (void)backTap {
     [_delegate prefsClose];
 }
-
-
 
 - (void)updateSoundButtonState {
     if (soundOn) {

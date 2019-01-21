@@ -9,13 +9,11 @@
 #import "AppDelegate.h"
 #import "GameScene.h"
 #import "GameCenterManager.h"
-#import <Chartboost/Chartboost.h>
-#import <StoreKit/StoreKit.h>
 #import <QuartzCore/QuartzCore.h>
 #import <MessageUI/MessageUI.h>
 #import "RHero.h"
 
-@interface AppDelegate () <ChartboostDelegate, SKProductsRequestDelegate, SKPaymentTransactionObserver, MFMailComposeViewControllerDelegate>
+@interface AppDelegate () <MFMailComposeViewControllerDelegate>
 
 @end
 
@@ -45,7 +43,6 @@
         [defs setValue:@(0) forKey:@"score"];
         [defs setValue:nil forKey:@"Hero"];
         [defs setValue:@(YES) forKey:@"askRate"];
-        [self setCanShowAds:YES];
     }
     _launchCount++;
     _canAskRate = [[defs valueForKey:@"askRate"] boolValue];
@@ -73,87 +70,10 @@
     soundCrashPlayer.numberOfLoops = 0;
     [soundCrashPlayer prepareToPlay];
     
-    
-    // set up chartboost
-    [Chartboost startWithAppId:@"570a7f19f6cd4561de20d2a2"
-                  appSignature:@"70614dcd967d22915665a564f660510232c9ea17"
-                      delegate:self];
-    
-    // set up in-app
-    [SKPaymentQueue.defaultQueue addTransactionObserver:self];
-    transactionInProgress = NO;
-    products = [NSMutableArray array];
-    productId = @"com.ozz.escape51.removeads";
-    [self requestProductInfo];
-    
     // Game center
     [[GameCenterManager sharedManager] authenticatePlayer];
     
-    // create loading alert
-    [self createLoadingAlert];
-    
     return YES;
-}
-
-- (void)requestProductInfo {
-    if ([SKPaymentQueue canMakePayments]) {
-        SKProductsRequest *productRequest = [[SKProductsRequest alloc] initWithProductIdentifiers:[NSSet setWithObject:productId]];
-        
-        productRequest.delegate = self;
-        [productRequest start];
-    }
-    else {
-        NSLog(@"Cannot perform In App Purchases.");
-    }
-}
-
-- (void)createLoadingAlert {
-    
-    pending = [UIAlertController alertControllerWithTitle:@"" message:@""
-                                                              preferredStyle:UIAlertControllerStyleAlert];
-    UIActivityIndicatorView *indicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
-    indicator.color = [UIColor blackColor];
-    indicator.translatesAutoresizingMaskIntoConstraints = NO;
-    [pending.view addSubview:indicator];
-    NSDictionary * views = @{@"pending" : pending.view, @"indicator" : indicator};
-    
-    NSArray * constraintsVertical = [NSLayoutConstraint constraintsWithVisualFormat:@"V:[indicator]-(20)-|" options:0 metrics:nil views:views];
-    NSArray * constraintsHorizontal = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|[indicator]|" options:0 metrics:nil views:views];
-    NSArray * constraints = [constraintsVertical arrayByAddingObjectsFromArray:constraintsHorizontal];
-    [pending.view addConstraints:constraints];
-    [indicator setUserInteractionEnabled:NO];
-    [indicator startAnimating];
-}
-
-- (void)showLoading {
-    
-    NSArray *titles = @[@"You shouldn't have done that.",
-                        @"Your time is important to us. Please hold.",
-                        @"Loading new loading alert.",
-                        @"Shovelling coal into the server.",
-                        @"640K ought to be enough for anybody."];
-    NSString *title = titles[arc4random() % [titles count]];
-    [pending setMessage:[NSString stringWithFormat:@"%@\n\n", title]];
-    
-    UIViewController *vc = self.window.rootViewController;
-    [vc presentViewController:pending animated:YES completion:nil];
-}
-
-- (void)hideLoadingWithCompletion:(void (^ __nullable)(void))completion {
-    [pending dismissViewControllerAnimated:YES completion:completion];
-}
-
-- (void)showMessageWithTitle:(NSString *)title Text:(NSString *)text {
-    UIAlertController *actionSheetController = [UIAlertController alertControllerWithTitle:title message:text preferredStyle:UIAlertControllerStyleAlert];
-    
-    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Got it" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
-        
-    }];
-    
-    [actionSheetController addAction:cancelAction];
-    
-    UIViewController *vc = self.window.rootViewController;
-    [vc presentViewController:actionSheetController animated:YES completion:nil];
 }
 
 
@@ -259,128 +179,6 @@
 }
 
 
-#pragma mark - Payment
-
-- (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response {
-    if (response.products.count != 0) {
-        for (SKProduct *product in response.products) {
-            [products addObject:product];
-        }
-    } else {
-        NSLog(@"There are no products.");
-    }
-    if (response.invalidProductIdentifiers.count != 0) {
-        NSLog(@"%@", response.invalidProductIdentifiers.description);
-    }
-}
-
-- (void)paymentQueueRestoreCompletedTransactionsFinished:(SKPaymentQueue *)queue {
-    transactionInProgress = NO;
-    [self hideLoadingWithCompletion:^{
-        NSLog(@"Received restored transactions: %lu", (unsigned long)queue.transactions.count);
-        BOOL restored = NO;
-        
-        for (SKPaymentTransaction *transaction in queue.transactions) {
-            NSString *pId = transaction.payment.productIdentifier;
-            if ([pId isEqualToString:productId]) {
-                [self setCanShowAds:NO];
-                [self showMessageWithTitle:@"Success 😎" Text:@"Purchases successfully restored"];
-                restored = YES;
-            }
-        }
-        if (!restored) {
-            UIAlertController *actionSheetController = [UIAlertController alertControllerWithTitle:@"Nothing to restore" message:@"I couldn't find any missing purchases associated with this account." preferredStyle: UIAlertControllerStyleAlert];
-            
-            UIAlertAction *rateAction = [UIAlertAction actionWithTitle:@"Contact Nick 😇" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                if ([MFMailComposeViewController canSendMail]) {
-                    MFMailComposeViewController *composeViewController = [[MFMailComposeViewController alloc] initWithNibName:nil bundle:nil];
-                    [composeViewController setMailComposeDelegate:self];
-                    [composeViewController setToRecipients:@[@"nikitarostovski@ya.ru"]];
-                    [composeViewController setSubject:@"wassup"];
-                    [self.window.rootViewController presentViewController:composeViewController animated:YES completion:nil];
-                }
-            }];
-            [actionSheetController addAction:rateAction];
-            
-            UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Got it" style:UIAlertActionStyleCancel handler:nil];
-            [actionSheetController addAction:cancelAction];
-            
-            
-            UIViewController *vc = self.window.rootViewController;
-            [vc presentViewController:actionSheetController animated:YES completion:nil];
-        }
-    }];
-}
-
-- (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray<SKPaymentTransaction *> *)transactions {
-    transactionInProgress = NO;
-    [self hideLoadingWithCompletion:^{
-        for (SKPaymentTransaction *transaction in transactions) {
-            switch (transaction.transactionState) {
-                case SKPaymentTransactionStatePurchased: {
-                    NSLog(@"Transaction completed successfully.");
-                    [SKPaymentQueue.defaultQueue finishTransaction:transaction];
-                    [self showMessageWithTitle:@"Success 😎" Text:@"Ads successfully removed"];
-                    [self setCanShowAds:NO];
-                    break;
-                }
-                case SKPaymentTransactionStateFailed: {
-                    NSLog(@"Transaction Failed");
-                    [SKPaymentQueue.defaultQueue finishTransaction:transaction];
-                    
-                    UIAlertController *actionSheetController = [UIAlertController alertControllerWithTitle:@"Can not remove ads!" message:@"I couldn't remove ads and I have no idea why!" preferredStyle: UIAlertControllerStyleAlert];
-                    
-                    UIAlertAction *rateAction = [UIAlertAction actionWithTitle:@"Contact Nick 😇" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-                        if ([MFMailComposeViewController canSendMail]) {
-                            MFMailComposeViewController *composeViewController = [[MFMailComposeViewController alloc] initWithNibName:nil bundle:nil];
-                            [composeViewController setMailComposeDelegate:self];
-                            [composeViewController setToRecipients:@[@"nikitarostovski@ya.ru"]];
-                            [composeViewController setSubject:@"wassup"];
-                            [self.window.rootViewController presentViewController:composeViewController animated:YES completion:nil];
-                        }
-                    }];
-                    [actionSheetController addAction:rateAction];
-                    
-                    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Got it" style:UIAlertActionStyleCancel handler:nil];
-                    [actionSheetController addAction:cancelAction];
-                    
-                    
-                    UIViewController *vc = self.window.rootViewController;
-                    [vc presentViewController:actionSheetController animated:YES completion:nil];
-                    break;
-                }
-                default:
-                    break;
-            }
-        }
-    }];
-}
-
-- (void)paymentQueue:(SKPaymentQueue *)queue restoreCompletedTransactionsFailedWithError:(NSError *)error {
-    transactionInProgress = NO;
-    [self hideLoadingWithCompletion:^{
-        UIAlertController *actionSheetController = [UIAlertController alertControllerWithTitle:@"Can not restore!" message:@"I couldn't restore anything because of some technical reasons. Or dinosaurs. Or zombeavers." preferredStyle: UIAlertControllerStyleAlert];
-        
-        UIAlertAction *rateAction = [UIAlertAction actionWithTitle:@"Contact Nick 😇" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            if ([MFMailComposeViewController canSendMail]) {
-                MFMailComposeViewController *composeViewController = [[MFMailComposeViewController alloc] initWithNibName:nil bundle:nil];
-                [composeViewController setMailComposeDelegate:self];
-                [composeViewController setToRecipients:@[@"nikitarostovski@ya.ru"]];
-                [composeViewController setSubject:@"wassup"];
-                [self.window.rootViewController presentViewController:composeViewController animated:YES completion:nil];
-            }
-        }];
-        [actionSheetController addAction:rateAction];
-        
-        UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Got it" style:UIAlertActionStyleCancel handler:nil];
-        [actionSheetController addAction:cancelAction];
-        
-        
-        UIViewController *vc = self.window.rootViewController;
-        [vc presentViewController:actionSheetController animated:YES completion:nil];
-    }];
-}
-
 
 - (void)applicationWillResignActive:(UIApplication *)application {
     if (_scene) {
@@ -408,53 +206,8 @@
 }
 
 
-
-
 #pragma mark - public
 
-- (void)removeAds {
-    if (transactionInProgress || ![products count]) {
-        //[self showError:@"Can not perform a transaction. Try again later"];
-        return;
-    }
-    /*if (![self canShowAds]) {
-        [self showMessageWithTitle:@"Hey!" Text:@"You've already removed ads"];
-        return;
-    }*/
-    
-    [self showLoading];
-    SKPayment *payment = [SKPayment paymentWithProduct: products[0]];
-    [SKPaymentQueue.defaultQueue addPayment:payment];
-    transactionInProgress = YES;
-}
-
-- (void)restorePurchases {
-    if (transactionInProgress) {
-        //[self showError:@"Can not restore purchases"];
-        return;
-    }
-    /*if (![self canShowAds]) {
-        [self showMessageWithTitle:@"Hey!" Text:@"You've already removed ads"];
-        return;
-    }*/
-    
-    [self showLoading];
-    [[SKPaymentQueue defaultQueue] restoreCompletedTransactions];
-    transactionInProgress = YES;
-}
-
-
-- (void)setCanShowAds:(BOOL)canShowAds {
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    [userDefaults setBool:canShowAds forKey:@"canShowAds"];
-    [userDefaults synchronize];
-}
-
-- (BOOL)canShowAds {
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-    return [[userDefaults valueForKey:@"canShowAds"] boolValue];
-    
-}
 
 - (void)musicPlay {
     if (_soundOn) {
