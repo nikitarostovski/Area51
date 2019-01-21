@@ -187,9 +187,11 @@ static const int kFlashCount = 16;
         _immortal = immortal;
         [immortalSprite setHidden:NO];
     } else {
-        [immortalSprite runAction:[SKAction sequence:@[[SKAction fadeAlphaTo:0.25 duration:0], [SKAction waitForDuration:1.0]]] completion:^{
-            _immortal = immortal;
-            [immortalSprite setHidden:YES];
+        __weak RHero *weakSelf = self;
+        __weak SKPixelSpriteNode *weakSprite = immortalSprite;
+        [weakSprite runAction:[SKAction sequence:@[[SKAction fadeAlphaTo:0.25 duration:0], [SKAction waitForDuration:1.0]]] completion:^{
+            weakSelf.immortal = immortal;
+            [weakSprite setHidden:YES];
         }];
     }
 }

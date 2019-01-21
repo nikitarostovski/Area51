@@ -88,12 +88,13 @@
     
     UIAlertController *actionSheetController = [UIAlertController alertControllerWithTitle:@"Like my game?" message:@"Let others know what you think about this game!" preferredStyle: UIAlertControllerStyleAlert];
     
+    __weak AppDelegate *weakSelf = self;
     
     UIAlertAction *rateAction = [UIAlertAction actionWithTitle:@"Rate now" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[kAppstoreLink copy]]];
         NSUserDefaults *defs = [NSUserDefaults standardUserDefaults];
         [defs setValue:@(NO) forKey:@"askRate"];
-        _canAskRate = NO;
+        weakSelf.canAskRate = NO;
         [defs synchronize];
     }];
     [actionSheetController addAction:rateAction];
@@ -105,7 +106,7 @@
     UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Leave me alone!" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
         NSUserDefaults *defs = [NSUserDefaults standardUserDefaults];
         [defs setValue:@(NO) forKey:@"askRate"];
-        _canAskRate = NO;
+        weakSelf.canAskRate = NO;
         [defs synchronize];
     }];
     [actionSheetController addAction:cancelAction];
