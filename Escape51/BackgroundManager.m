@@ -69,6 +69,7 @@ static const CGFloat kPlaneSpeed = 200.0f;
 - (void)initBackground {
     backSprites = [NSMutableArray array];
     [self addBackSprite];
+    [self addBackSprite];
     
     CGFloat planeWidthCoeff = 0.3f;
     

@@ -15,8 +15,6 @@ static const CGFloat kButtonSize = 0.15f;
 
 @implementation PrefsNode {
     SKPSettingsButton *soundBtn;
-    SKPSettingsButton *adsBtn;
-    SKPSettingsButton *restoreBtn;
     SKPButton *backBtn;
     
     BOOL soundOn;
@@ -32,28 +30,15 @@ static const CGFloat kButtonSize = 0.15f;
         
         CGFloat verticalOffset = self.size.height * 0.04f;
         CGFloat buttonHeight = self.size.width * kButtonSize;
-        /*CGFloat totalButtonsHeight = 3 * buttonHeight + 2 * verticalOffset;
+        CGFloat totalButtonsHeight = 3 * buttonHeight + 2 * verticalOffset;
         CGFloat totalButtonsWidth = size.width * 0.6f;
         
         CGFloat startPosY = - totalButtonsHeight / 2;
         
-        
-        restoreBtn = [[SKPSettingsButton alloc] initWithImage:@"Btn_prefs_restore" Size:CGSizeMake(totalButtonsWidth, buttonHeight) Text:@"Restore" Text2:@"purchases"];
-        [restoreBtn setPosition:CGPointMake(0, startPosY + restoreBtn.size.height / 2)];
-        [restoreBtn.button addTarget:self action:@selector(restoreTap)];
-        [self addChild:restoreBtn];
-        
-        adsBtn = [[SKPSettingsButton alloc] initWithImage:@"Btn_prefs_ads" Size:restoreBtn.size Text:@"Remove ADS" Text2:@""];
-        [adsBtn setPosition:CGPointMake(0, restoreBtn.position.y + restoreBtn.size.height / 2 + verticalOffset + adsBtn.size.height / 2)];
-        [adsBtn.button addTarget:self action:@selector(adsTap)];
-        [self addChild:adsBtn];*/
-        
-        soundBtn = [[SKPSettingsButton alloc] initWithImage:@"Btn_prefs_sound_on" Size:restoreBtn.size Text:@"Sound On" Text2:@""];
-        [soundBtn setPosition:CGPointMake(0, adsBtn.position.y + adsBtn.size.height / 2 + verticalOffset + soundBtn.size.height / 2)];
+        soundBtn = [[SKPSettingsButton alloc] initWithImage:@"Btn_prefs_sound_on" Size: CGSizeMake(totalButtonsWidth, buttonHeight) Text:@"Sound On" Text2:@""];
+        [soundBtn setPosition:CGPointMake(0, startPosY + soundBtn.size.height / 2)];
         [soundBtn.button addTarget:self action:@selector(soundTap)];
         [self addChild:soundBtn];
-        
-        restoreBtn.title.fontSize = adsBtn.title.fontSize = soundBtn.title.fontSize = MIN(restoreBtn.title.fontSize, MIN(adsBtn.title.fontSize, soundBtn.title.fontSize));
         
         
         backBtn = [[SKPButton alloc] initWithDefaultImage:@"Btn_prefs_back" SelectedImage:@"Btn_prefs_back" DisabledImage:@"Btn_prefs_back"];

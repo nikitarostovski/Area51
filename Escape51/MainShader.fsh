@@ -1,6 +1,6 @@
 vec2 CRTCurveUV(vec2 uv) {
     uv = uv * 2.0 - 1.0;
-    vec2 offset = abs(uv.yx) / vec2(10, 10);
+    vec2 offset = abs(uv.yx) / vec2(8, 8);
     uv = uv + uv * offset * offset;
     uv = uv * 0.5 + 0.5;
     return uv;
@@ -8,7 +8,7 @@ vec2 CRTCurveUV(vec2 uv) {
 
 vec4 DrawVignette(vec4 color, vec2 uv) {
     float vignette = uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y);
-    vignette = clamp(pow(16.0 * vignette, 0.05), 0.0, 1.0);
+    vignette = clamp(pow(16.0 * vignette, 0.18), 0.0, 1.0);
     color *= vignette;
     return color;
 }
@@ -21,17 +21,19 @@ void main() {
     float ppx = pixel_pos.x;
     float ppy = pixel_pos.y;
     
-    float pxm = mod(ppx, 3.0);
-    float pym = mod(ppy, 3.0);
+    float pxc = 4.0;
+    
+    float pxm = mod(ppx, pxc);
+    float pym = mod(ppy, pxc);
     
     
     float otherVerts = 0.75;
     
-    if (pxm < 1.0) {
+    if (pxm < pxc / 3) {
         col = vec4(col.r, col.g * otherVerts, col.b * otherVerts, col.a);
-    } else if (pxm < 2.0) {
+    } else if (pxm < pxc * 2 / 3) {
         col = vec4(col.r * otherVerts, col.g, col.b * otherVerts, col.a);
-    } else if (pxm < 3.0) {
+    } else if (pxm < pxc) {
         col = vec4(col.r * otherVerts, col.g * otherVerts, col.b, col.a);
     }
     

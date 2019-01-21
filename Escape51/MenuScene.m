@@ -209,7 +209,7 @@ static const CGFloat kTransitionTime = 0.7f;
     NSArray *backPrefs = [[NSDictionary dictionaryWithContentsOfFile:filePath] valueForKey:@"Background"];
     SKPixelSpriteNode *back = [[SKPixelSpriteNode alloc] initWithImageNamed:backPrefs[0][@"image"]];
     [back setZPosition:0];
-    [back setSize:CGSizeMake(self.size.width, back.size.height / back.size.width * self.size.width)];
+    [back setSize:self.size];
     [back setPosition:CGPointMake(self.size.width / 2, back.size.height / 2)];
     [self addChild:back];
     
@@ -235,6 +235,7 @@ static const CGFloat kTransitionTime = 0.7f;
 
 - (void)setupHero {
     hero = [[RHero alloc] initWithPosition:CGPointZero Width:self.heroStartWidth];
+    [hero setZPosition:100];
     [hero setPosition:CGPointMake(heroPosition.x, heroPosition.y + hero.size.height / 2)];
     [hero setAlpha:0];
     [self addChild:hero];
